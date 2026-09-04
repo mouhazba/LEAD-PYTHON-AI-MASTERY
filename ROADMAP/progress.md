@@ -4,20 +4,25 @@
 
 - [x] Core syntax
 - [x] Functions
-- [ ] Lists
-- [ ] tuple
-- [ ] comprehensions
+- [x] Lists
+- [x] tuple
 - [~] Dictionnaires (dict) — 🟢 Competent séances du 2026-08-22 et 2026-08-25
-- [ ] Sets
+- [~] Sets — 🟢 Competent séance du 2026-08-29
+- [~] comprehensions — 🟢 Competent séance du 2026-09-02
 - [ ] Exceptions
+- [ ] lambda
+- [ ] Decorators
+- [ ] *args-**kwargs
+- [ ] Generators
+
+
+Level: 🟡 Intermediate
+
+## Python Advance
 - [ ] Modules
 - [ ] Package
 - [ ] Imports
-- [ ] Decorators
-- [ ] *args-**kwargs
-- [ ] lambda
 - [ ] Context managers
-- [ ] Generators
 - [ ] Descriptor
 - [ ] Protocols
 - [ ] Type hints
@@ -25,7 +30,7 @@
 - [ ] pip
 - [ ] Async Python
 
-Level: 🟡 Intermediate
+Level: 🔴 Beginner
 
 ---
 
