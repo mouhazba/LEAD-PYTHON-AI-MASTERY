@@ -7,13 +7,15 @@
 - [x] Lists
 - [x] tuple
 - [~] Dictionnaires (dict) — 🟢 Competent séances du 2026-08-22 et 2026-08-25
+- [ ] Dictionnaires imbriqués / fusion (`|`, `.update()`) — en attente depuis le 2026-08-22
 - [~] Sets — 🟢 Competent séance du 2026-08-29
+- [ ] Set comprehension — en attente depuis le 2026-09-02
 - [~] comprehensions — 🟢 Competent séance du 2026-09-02
-- [ ] Exceptions
-- [ ] lambda
-- [ ] Decorators
-- [ ] *args-**kwargs
+- [x] Exceptions — 🔵 Advanced séances du 2026-09-06 au 2026-09-16 (mécanique, translation pattern, revue de code, propagation multi-couches)
 - [ ] Generators
+- [x] *args-**kwargs — 🟢 Competent séance du 2026-09-17 (mécanique + rationale wrapper générique)
+- [x] lambda — 🟢 Competent séance du 2026-09-17 (déjà solide au diagnostic)
+- [x] Decorators — 🔵 Advanced séance du 2026-09-17 (empilement, propagation `@wraps`, décoration de méthodes, anti-pattern `lru_cache`/self, revue de code `retry` avec chaînage `from e`)
 
 
 Level: 🟡 Intermediate
@@ -46,7 +48,7 @@ Level: 🔴 Beginner
 - [ ] Memory Moddele
 - [ ] SOLID
 
-Level: 🟡
+Level: 🔴 Beginner
 
 ---
 

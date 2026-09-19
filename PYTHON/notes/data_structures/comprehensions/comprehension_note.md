@@ -1,5 +1,3 @@
-merci j'ai bien compris, pour mes notes ulterieures genere moi  .md bien formate de ceci
-:
 Comprehensions — approfondissement (Engineering / Advanced)
 
 Niveau 2 — Scope propre (piège que tu n'as pas encore vu)
