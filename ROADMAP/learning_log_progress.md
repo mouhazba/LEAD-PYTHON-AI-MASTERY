@@ -603,3 +603,168 @@ Suite recommandée : `Generators` (sujet structurant restant du roadmap
 Lead), ou clore les points en attente (dictionnaires imbriqués/fusion, set
 comprehension) si l'apprenant préfère des sujets plus courts avant le
 prochain gros morceau.
+
+---
+
+## 2026-09-19/20 — Generators (learning_coach)
+
+### Concept étudié
+Cycle complet niveau Lead sur les générateurs : syntaxe `yield` (repartie de
+zéro, syntaxe complètement oubliée), mécanique de suspension/reprise
+d'exécution, protocole itérateur et `StopIteration` (relié explicitement à
+la maîtrise déjà acquise sur les exceptions), épuisement définitif d'un
+générateur après un passage complet, distinction précise generator function
+vs generator expression, cas d'usage réel (lecture paresseuse d'un fichier
+volumineux, `for ligne in f` vs `f.read()`), composition de générateurs en
+pipeline sans matérialisation intermédiaire, générateurs infinis +
+`itertools.islice`, trade-offs (quand NE PAS utiliser un générateur : accès
+indexé, itérations multiples, tri), et revue de code d'un générateur de
+regroupement par lots avec argument par défaut mutable.
+
+### Niveau démontré
+🔵 Advanced (cible atteinte).
+
+### Compétences démontrées (preuves)
+- **Reconstruction rapide après oubli complet** : syntaxe `yield`
+  totalement oubliée au départ ("j'ai franchement oublié tout"), mais
+  application autonome et correcte dès le premier indice minimal
+  (`carres(n)`), puis application propre et rapide sur tous les exercices
+  suivants sans nouvelle régression sur la syntaxe de base.
+- **Diagnostic autonome d'un bug de lecture de fichier** : a identifié seul,
+  après une seule question guidée, que `f.read()` charge tout le fichier en
+  mémoire (contraire à l'objectif) et qu'itérer sur une chaîne de
+  caractères produit des caractères et non des lignes — corrigé vers
+  `for ligne in f` directement.
+- **Pipeline de générateurs correct du premier coup** : `extraire_dates`
+  écrite comme fonction générique (accepte n'importe quel itérable de
+  lignes), composée directement avec `lire_erreurs` sans code fourni par le
+  mentor au-delà du squelette conceptuel.
+- **Trade-offs correctement identifiés sans aide** : cas d'usage légitime
+  d'un générateur (fichier volumineux, mémoire), et limites (accès indexé,
+  itérations multiples) formulés de façon autonome et précise.
+- **Revue de code à deux niveaux, avec auto-correction remarquée** : a
+  identifié seul le bug du lot final incomplet perdu (logique) ; sur le bug
+  plus subtil (argument par défaut mutable `lot=[]`), a nécessité
+  l'explication du mentor (connaissance factuelle non déductible par
+  raisonnement) mais a ensuite, **de sa propre initiative**, testé une
+  deuxième variante (garder `lot` en paramètre avec `is None`) et **repéré
+  lui-même**, en observant sa propre sortie incorrecte (`[[1, 2, 3, 'a',
+  'b']]`, 5 éléments au lieu de lots de 3), que son `is None` était du code
+  mort puisque le défaut réel était toujours `lot=[]` — puis a choisi de
+  conserver la solution la plus simple et la plus sûre (ne pas exposer
+  `lot` comme paramètre) plutôt que de complexifier avec le pattern
+  sentinelle `None`.
+
+### Points encore faibles
+- **Rétention à moyen terme faible sur la syntaxe de base** : la mécanique
+  `yield` avait été vue en formation mais entièrement oubliée avant cette
+  séance — à surveiller sur les prochains sujets (est-ce un cas isolé lié à
+  un temps d'inactivité, ou un pattern de rétention à renforcer par de la
+  pratique répétée espacée ?).
+- **Distinction generator function / generator expression** a nécessité
+  deux passages avant d'être correctement reformulée (le premier essai
+  répétait la même explication imprécise "réutilisable vs non réutilisable"
+  déjà donnée avant explication).
+- **Progrès à noter sur le point faible transversal identifié depuis les
+  séances Exceptions/Decorators** (vérifier son travail avant de le
+  soumettre) : première réelle démonstration spontanée d'auto-vérification
+  réussie dans cette séance (repérage du bug `is None` mort via sa propre
+  sortie de test, sans qu'on le lui signale directement) — à confirmer sur
+  les prochaines séances avant de considérer ce point comme résolu.
+
+### Prochain point recommandé
+Sujets structurants restants du roadmap Lead : `Context managers`,
+`Type hints`, `Iterators` (approfondissement — vu en survol via le protocole
+itérateur pendant cette séance, jamais implémenté à la main via
+`__iter__`/`__next__`), `OOP`/`Composition`. Sinon, clore les points en
+attente (dictionnaires imbriqués/fusion, set comprehension) si l'apprenant
+préfère un sujet plus court avant le prochain gros morceau.
+
+---
+
+## 2026-10-02 → 2026-10-11 — Projet capstone : pipeline de normalisation multi-sources (`PYTHON/projects/v_001_intermediare`)
+
+### Concept étudié
+Projet de fin de cycle intermédiaire, choisi pour sa réutilisabilité dans
+les phases ultérieures du roadmap plutôt que pour cocher des concepts :
+pipeline à 4 étapes (extraction, mise en forme commune, validation métier,
+déduplication) sur 3 sources hétérogènes (CSV, JSONL, log texte). Conception
+menée via le skill `architecture_review` (Design Cycle complet : requirements
+→ décomposition → frontières → points de variation → mécanismes → défense →
+revue → itération), implémentation guidée par revue de code à chaque étape,
+documentation vivante tenue à jour dans `conception.md`.
+
+### Niveau démontré
+🟢 Competent en conception/architecture (nouveau sous-thème évalué pour la
+première fois) ; réemploi confirmé et appliqué en conception réelle des
+acquis `Exceptions`/`Generators`/`Decorators` déjà 🔵 Advanced.
+
+### Compétences démontrées (preuves)
+- **Décomposition itérative jusqu'à une architecture propre** : 3 versions
+  successives du découpage avant une version sans chevauchement de
+  responsabilités (voir `conception.md` §10, historique v1→v5) — progression
+  normale en conception, pas un échec des tentatives précédentes.
+- **Hiérarchie d'exceptions défendue, pas suivie par défaut** : a justifié
+  seul la fusion de 4 classes d'exception par champ en une seule
+  `DonneeInvalidError`, avec le critère correct ("`except A` fait-il
+  vraiment autre chose que `except B` en aval ?"), et a lui-même proposé
+  puis abandonné une classe `LingeInvalidError` en reconnaissant qu'elle
+  était systématiquement reconvertie en générique dès qu'attrapée.
+- **Réutilisation correcte de l'épuisement des générateurs** (acquis
+  🔵 Advanced de la séance Generators) dans un nouveau contexte : a compris
+  et appliqué la règle "jamais `raise` pour une ligne, toujours `yield` un
+  tuple" pour préserver la granularité ligne-par-ligne sans tuer le
+  générateur prématurément.
+- **Diagnostic autonome d'une limite du format JSON** (non vue en cours) :
+  a identifié que `json.load` sur un tableau JSON casse la granularité
+  ligne-par-ligne, et a reformaté la source en JSONL pour la restaurer —
+  raisonnement transféré depuis le besoin déjà compris, pas une recette
+  apprise par cœur.
+- **Mutable default argument évité correctement en situation réelle**
+  (`ids_vus=None` + sentinelle) sans qu'on ait eu à le rappeler — réemploi
+  spontané de l'anti-pattern vu en revue de code pendant la séance
+  Generators.
+- **Revue de code sur plusieurs tours, avec correction complète à chaque
+  fois** : bug de précédence d'opérateurs (`and`/`or`) dans
+  `verification_presence`, double-emballage d'exception
+  (`SourceInvalidError(SourceInvalidError(...))`), indexation erronée
+  `e.erreur[0]`/`e.erreur[1]` sur une chaîne, variable utilisée avant
+  affectation garantie, incohérence de forme du rapport d'incidents (dict
+  vs chaîne, puis clé `"Ligne N"` vs `N`) — chaque fois corrigé complètement
+  dès le tour suivant une fois le problème signalé et une piste de scénario
+  concret donnée.
+- **Dédup raisonnée correctement à partir de questions ouvertes, sans
+  fragment de code** : a correctement déduit que la portée devait être
+  globale (set partagé entre les 3 appels, passé en paramètre depuis
+  `main()`), que le filtre ne devait s'appliquer qu'aux enregistrements
+  déjà valides, et que l'insertion se faisait après les deux vérifications
+  — les trois réponses tenaient déjà la bonne conception avant d'écrire une
+  ligne de code.
+
+### Points encore faibles
+- **Les smells structurels ont presque toujours été repérés par la revue
+  du mentor, pas de façon autonome** : double-emballage, bug de précédence,
+  incohérence de forme du rapport, variable non garantie — aucun n'a été
+  détecté en premier par l'apprenant lui-même avant d'être signalé. C'est
+  précisément la barre qui distingue 🟢 Competent de 🔵 Advanced en
+  conception (skill `architecture_review`) : il manque au moins une
+  instance de smell repéré en premier par l'apprenant sur son propre
+  travail.
+- **Un lapsus de vérification** : deux exécutions différentes collées à la
+  suite dans un seul message (étape 4), sans préciser laquelle reflétait
+  le code actuel — signalé, pas encore récurrent sur ce projet, mais à
+  surveiller (cf. [[feedback_verify_pasted_code]]).
+- Reste cosmétique, non bloquant : variables `numero_ligne` inutilisées
+  dans `verification_presence`/`verification_format`, espacement dans le
+  message `JSONDecodeError`.
+
+### Prochain point recommandé
+Pour viser 🔵 Advanced en conception : un prochain exercice de design où
+l'auto-revue (checklist Design Smells du skill `architecture_review`)
+est demandée **avant** la revue du mentor, pour vérifier si l'apprenant
+détecte un smell en premier sur son propre travail. Sur le roadmap
+général : clore Phase 1 (`Files` — déjà abordé en aparté sur ce projet,
+donc à démarrer par une explication et non un diagnostic ; puis `Modules`,
+`Packages`, `Virtual environments`), puis Phase 2 (`Iterators`, `Context
+managers`, `OOP`/`Composition` — ce même projet est explicitly prévu comme
+terrain de réemploi pour un refactor OOP/Composition, cf. `conception.md`).

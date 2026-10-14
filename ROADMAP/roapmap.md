@@ -19,7 +19,7 @@ Target: 🟢 Competent
 Target: 🟢 Competent → 🔵 Advanced
 
 - [ ] Iterators
-- [ ] Generators
+- [x] Generators
 - [x] Decorators
 - [ ] Context managers
 - [ ] Type hints
