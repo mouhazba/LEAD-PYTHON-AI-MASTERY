@@ -1,0 +1,8 @@
+[2024-05-01] LOGIN id=101 name="Omar Ba" email=omar@example.com
+[2024-06-01] NEW_USER id=101 name="Omar Ba" email=omar@example.com
+[2024-06-02] UPDATE_USER id=102 name="Awa Diop" email=awa.diop@company.sn
+[2024-06-03] LOGIN id=103 name="Mamadou Sow" email=m.sow123@domain.org
+[2024-06-04] NEW_USER id=104 name="Demba Diop" email=dmbaexample.com
+[2024-06-05] UPDATE_USER id=abc name="Fatou Ndiaye" email=fatou@example.com
+[2024-06-06]  id=106 name="" email=bad-email
+[2024-06-07] NEW_USER id=107 name="Ibrahima Diallo"
