@@ -1,6 +1,7 @@
 # Lead Python + AI Engineer Roadmap
 
 ## Phase 1 — Python Foundations
+
 Target: 🟢 Competent
 
 - [x] Core syntax
@@ -10,12 +11,13 @@ Target: 🟢 Competent
 - [x] Sets
 - [x] Comprehensions
 - [x] Exceptions
-- [ ] Modules
-- [ ] Packages
-- [ ] Files
-- [ ] Virtual environments
+- [x] Modules
+- [x] Packages
+- [x] Files
+- [x] Virtual environments
 
 ## Phase 2 — Python Advanced + OOP
+
 Target: 🟢 Competent → 🔵 Advanced
 
 - [ ] Iterators
@@ -30,6 +32,7 @@ Target: 🟢 Competent → 🔵 Advanced
 - [ ] Dataclasses
 
 ## Phase 3 — Software Engineering
+
 Target: 🔵 Advanced
 
 - [ ] SOLID
@@ -39,5 +42,3 @@ Target: 🔵 Advanced
 - [ ] Logging
 - [ ] Configuration
 - [ ] Git / CI/CD
-
-...

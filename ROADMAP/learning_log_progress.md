@@ -768,3 +768,231 @@ donc à démarrer par une explication et non un diagnostic ; puis `Modules`,
 `Packages`, `Virtual environments`), puis Phase 2 (`Iterators`, `Context
 managers`, `OOP`/`Composition` — ce même projet est explicitly prévu comme
 terrain de réemploi pour un refactor OOP/Composition, cf. `conception.md`).
+
+---
+
+## 2026-10-16 — Files (modes, lecture paresseuse, écriture)
+
+### Concept étudié
+Lecture/écriture de fichiers texte : itération paresseuse via `readline()`
+(walrus `while line := f.readline():`) par opposition à `read()`/`readlines()`
+eager (déjà amorcé le 2026-10-02) ; sémantique des modes d'ouverture `"w"`
+(troncature) vs `"a"` (ajout) et choix du bon mode selon ce que le fichier de
+sortie est censé représenter ; `with` + `encoding="utf-8"` systématiques.
+Exercice : `compter_mots(chemin)` → retourne un total agrégé ; `ecrire_rapport
+(chemin_sortie, stats)` → écrit un rapport texte lisible à partir de ce total.
+
+### Niveau démontré
+🟢 Competent
+
+### Compétences démontrées (preuves)
+- Première tentative : contrat non respecté — `compter_mots` transformée en
+  générateur `yield`-ant un dict cumulatif par ligne au lieu de `return`-er un
+  total unique ; `ecrire_rapport` réécrivait `str(stats)` (repr brut du dict)
+  en mode `"a"` à chaque ligne du fichier source plutôt qu'un rapport lisible
+  écrit une seule fois. Mécanique de lecture paresseuse (`readline()`+walrus,
+  `with`, `encoding`) déjà correcte à ce stade.
+- Déviation signalée sans fragment de correction fourni (STEP 8 : indice +
+  nouvelle tentative). Deuxième tentative : contrat entièrement rétabli sans
+  qu'on donne la solution — `compter_mots` retourne `{"lignes": int, "mots":
+  int}` une seule fois après la boucle, `ecrire_rapport` ouvre le fichier de
+  sortie une seule fois en `"w"` et écrit deux lignes lisibles.
+- **Choix de mode justifié en raisonnement propre**, pas par réflexe : passage
+  de `"a"` à `"w"` explicitement motivé par "pour ne garder que les dernières
+  stats à jour" — montre la compréhension du critère réel (ce que le fichier
+  de sortie représente), pas seulement la règle syntaxique écrase/ajoute.
+- Calcul vérifié correct à la main (45 mots / 8 lignes sur `srce.log`,
+  tokenisation par `split()` sur les espaces, y compris une ligne à champ
+  vide et une ligne à champ manquant).
+
+### Points encore faibles
+- **Sortie "terminal" collée deux fois non fidèle au code réel** dans la même
+  séance (repr de dict avec un `.` final inexistant dans le code, puis
+  `print("Complete process")` retranscrit `"process complete"`) — le code et
+  le contenu fichier étaient corrects à chaque fois, seule la transcription
+  de sortie divergeait. Pattern déjà connu, étendu aux sorties de programme —
+  voir [[feedback_verify_pasted_code]] (occurrence #4).
+- Non couvert, différé volontairement (réemploi prévu en projet plutôt que
+  diagnostic dédié) : itération directe `for line in f`, gestion d'un fichier
+  absent via `try/except FileNotFoundError` plutôt que `if chemin.exists()`,
+  autres modes (`"r+"`, `"x"`, binaire).
+
+### Prochain point recommandé
+Phase 1 du roadmap général quasiment close (reste `Modules`, `Packages`,
+`Virtual environments`). Les items Files différés seront réabordés par la
+pratique lors d'un futur projet (cohérent avec la préférence déjà exprimée
+par l'apprenant pour le réemploi en contexte plutôt que l'exercice isolé).
+
+---
+
+## 2026-10-16 → 2026-10-18 — Modules (import, `sys.path`, `__name__`, découpage)
+
+### Concept étudié
+Mécanique de `import x` vs `from x import y` (cache `sys.modules`, exécution
+unique du fichier, liaison de noms), rôle de `sys.path` dans la résolution
+d'un import, sémantique de `__name__`/`"__main__"`. Appliqué en conditions
+réelles : refactor de `PYTHON/projects/v_001_intermediare/resolution.py`
+(~270 lignes, un seul fichier) en plusieurs modules.
+
+### Niveau démontré
+🟢 Competent
+
+### Compétences démontrées (preuves)
+- Diagnostic initial : 2 trous nets (mécanisme interne de `import`,
+  résolution via `sys.path`) et 2 réponses correctes mais imprécises
+  (différence `import`/`from...import` juste sur l'effet observé ;
+  `__name__` confondu avec "le nom du fichier" plutôt que "le nom sous
+  lequel le module a été importé"). Explication complète donnée en
+  conséquence plutôt qu'un diagnostic plus poussé — profil classique
+  d'usage efficace de `import` sans connaître le mécanisme dessous.
+- **Découpage conçu entièrement par questions ouvertes, avant d'écrire une
+  seule ligne de code** : proposition initiale (`extraction`, `parser`,
+  `validation`, `dedupe`, `main`) incomplète (ne couvrait pas les
+  traducteurs, les exceptions partagées, ni `traitement()`/l'orchestration).
+  Complétée progressivement par l'apprenant lui-même :
+  - `main.py` = point d'entrée (justifié correctement dès la première
+    question).
+  - Exceptions partagées (`AppError`, `SourceInvalidError`,
+    `DonneeInvalidError`) → fichier séparé importé par les deux modules qui
+    en ont besoin, pour éviter l'import circulaire entre `extraction.py` et
+    `validation.py` — raisonnement correct dès la première proposition.
+  - Traduction séparée de l'extraction après un indice sur le critère de
+    cohésion ("ces fonctions changent-elles pour la même raison ?") — choix
+    qui recoupe la propre documentation du projet (étapes "extraction" vs
+    "mise en forme commune" déjà posées en conception).
+  - Dédup laissé inline plutôt que forcé dans un `dedupe.py` : a remarqué
+    seul qu'aucune fonction de dédup séparée n'existe dans le code actuel
+    et a choisi de ne pas sur-découper prématurément.
+  - **`extracteur_path`/`EXTRACTEURS_FILE`/`TRADUCTEURS_FILE`** (a besoin à
+    la fois de l'extraction et de la traduction) placé dans `pipeline.py` —
+    **critère anti-cycle réappliqué de façon autonome**, sans qu'on le
+    redise une seconde fois après l'exemple des exceptions. C'est la preuve
+    la plus forte de la séance : transfert du principe, pas répétition
+    d'une règle apprise par cœur.
+- Implémentation : 6 modules (`exceptions.py`, `parser.py`,
+  `extractions.py`, `traduction.py`, `validations.py`, `pipeline.py`) +
+  `main.py`, exécutés et vérifiés (`python3 main.py`) — aucune erreur
+  d'import, aucun cycle, sortie JSON cohérente avec la logique d'origine.
+
+### Points encore faibles
+- Nommage incohérent (`extractions.py`/`validations.py` au pluriel, les
+  autres fichiers au singulier) — cosmétique, sans impact fonctionnel.
+- En déplaçant les fichiers, `conception.md` et `cahier_de_charges.md` sont
+  apparus temporairement comme supprimés dans `git status` (en réalité
+  déplacés dans un sous-dossier) — signalé avant d'agir, rien n'a été perdu,
+  mais à garder en tête : une réorganisation de fichiers mérite un coup
+  d'œil `git status` avant de continuer, par réflexe.
+- Non testé : imports relatifs (`from . import x`), comportement si le
+  script est lancé depuis un autre dossier que celui du projet — sujet
+  naturel pour `Packages`.
+
+### Prochain point recommandé
+`Packages` est la suite directe et quasi immédiate : ces 6 modules à plat
+dans `v_001_intermediare/` sont exactement le cas d'usage qui justifie de
+les regrouper dans un package avec `__init__.py` et des imports relatifs,
+une fois le projet amené à grossir encore.
+
+---
+
+## 2026-10-18 — Packages (`__init__.py`, imports relatifs, `-m`)
+
+### Concept étudié
+Package = dossier avec `__init__.py` (corps exécuté comme le module
+`__init__` du package, pas un simple marqueur) ; import relatif (`from
+.module import x`) vs absolu, et leur dépendance au mode de lancement
+(`python -m pkg.module` vs `python module.py` direct) ; conséquence sur
+`__name__` et sur la notion de "parent package connu".
+
+### Niveau démontré
+🟢 Competent
+
+### Compétences démontrées (preuves)
+- Sujet marqué 🔴 Beginner / jamais abordé → explication directe sans
+  diagnostic, conformément à la règle convenue avec l'apprenant (reperdue
+  une fois par compactage de contexte, maintenant enregistrée en mémoire
+  durable : [[feedback_skip_diagnostic_when_beginner]]).
+- Question "vide ou exposer quelque chose dans `__init__.py`" non comprise
+  du premier coup (trop abstraite) — reformulée avec un exemple concret
+  (`from v_001_intermediare import traitement` grâce à une ré-exportation
+  vs chemin complet obligatoire). Une fois l'exemple donné, décision prise
+  correctement et justifiée par le besoin réel : "reste autonome, pas
+  besoin de l'exposer en dehors" — `__init__.py` vide, pas de façade
+  construite sans qu'un appelant externe existe (réflexe YAGNI déjà vu en
+  architecture).
+- A posé seul la question du bon répertoire de lancement pour `python -m
+  PYTHON.projects.v_001_intermediare.main`, en reliant correctement au
+  mécanisme `sys.path` déjà appris sur Modules plutôt que de deviner.
+- Conversion complète et correcte des imports absolus en imports relatifs
+  dans les 5 fichiers concernés (`parser.py`, `extractions.py`,
+  `validations.py`, `pipeline.py`, `main.py`) dès la première tentative.
+- Résultat vérifié dans les deux sens : `python -m
+  PYTHON.projects.v_001_intermediare.main` depuis la racine → fonctionne,
+  sortie identique ; `python main.py` depuis le dossier → échoue avec
+  `ImportError: attempted relative import with no known parent package`,
+  exactement l'erreur prédite par l'explication initiale.
+
+### Points encore faibles
+- La question initiale sur `__init__.py` (vide/exposer) était formulée trop
+  abstraitement pour être comprise sans exemple concret — à formuler avec
+  un exemple de code dès la première tentative la prochaine fois sur un
+  sujet aussi neuf.
+- Non testé : namespace packages implicites (PEP 420, pourquoi `PYTHON/` et
+  `PYTHON/projects/` n'ont pas besoin de `__init__.py`) — mentionné en
+  aparté par le mentor, pas découvert ni testé par l'apprenant lui-même.
+
+### Prochain point recommandé
+`Virtual environments` pour clore la Phase 1 du roadmap général (reste
+ensuite `Imports` dans la liste "Python Advance", déjà largement couvert
+en pratique par Modules/Packages — vérifier si un diagnostic suffit avant
+de le traiter comme un sujet à part).
+
+---
+
+## 2026-10-19 — Virtual environments (`venv`, `pip`, `requirements.txt`)
+
+### Concept étudié
+Isolation des dépendances par projet : `python -m venv`, activation
+(modification de `PATH`/`sys.path` pour ce terminal), `pip install` dans
+l'environnement actif, `pip freeze > requirements.txt`, `.gitignore` du
+venv. Sujet marqué 🔴 Beginner / jamais abordé → explication directe sans
+diagnostic (règle [[feedback_skip_diagnostic_when_beginner]]).
+
+### Niveau démontré
+🟢 Competent
+
+### Compétences démontrées (preuves)
+- Mécanique de base exécutée correctement du premier coup : création du
+  venv, activation, `pip install requests`, `pip freeze > requirements.txt`
+  (sortie correcte avec dépendances transitives figées), correction du
+  typo `__pycache__` dans `.gitignore`.
+- **Erreur de nommage repérée et corrigée après signalement** : venv créé
+  sous `.env` (collision de convention avec les fichiers de variables
+  d'environnement) plutôt que `.venv` — renommé sur simple signalement,
+  sans qu'on ait besoin d'expliquer en détail pourquoi au moment de la
+  correction.
+- **Tentative de renommage du venv (`mv .env .venv`) a cassé `bin/pip`**
+  (`bad interpreter: No such file or directory`) — diagnostiqué en
+  direct : le shebang de `bin/pip` contient le chemin absolu figé à la
+  création (`.env/bin/python3`), que `mv` ne met pas à jour. Leçon retenue
+  à la demande du mentor : un venv doit être **recréé**, pas déplacé ou
+  renommé après coup.
+- A explicitement demandé une défense en profondeur plutôt que de se fier
+  uniquement au `.gitignore` auto-généré à l'intérieur du venv (bon réflexe
+  de robustesse, pas suggéré par le mentor).
+
+### Points encore faibles
+- `pip` pour lui-même (versions, résolution de dépendances, différence
+  `pip install` vs `pip install -e`, `pyproject.toml`/`setup.py` vs
+  `requirements.txt`) seulement pratiqué en passant, pas couvert comme
+  sujet à part — marqué `[~]` dans `progress.md`.
+- N'a pas anticipé seul le problème de chemin absolu avant de renommer —
+  normal pour un sujet neuf, mais à garder en tête : un venv a des chemins
+  absolus figés à la création, contrairement à un module/package qui se
+  déplace librement (lien à faire si `Imports`/`pip` sont repris plus tard).
+
+### Prochain point recommandé
+Phase 1 du roadmap général terminée (`Core syntax` → `Virtual
+environments`). Passage naturel à la Phase 2 (`Iterators`, `Context
+managers`, `Type hints`, `Protocols`, `OOP`/`Composition` — ce dernier
+explicitement prévu en réemploi sur `v_001_intermediare`, cf.
+`conception.md`). À l'apprenant de choisir l'ordre.

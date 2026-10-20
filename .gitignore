@@ -1,2 +1,4 @@
-__vs_code__//
+__vs_code__/
+__pycache__/
+.venv/
 zzz/
